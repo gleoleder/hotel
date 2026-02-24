@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HotelSync PMS — Property Management System</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="toast-stack" id="toasts"></div>
+<div class="loading-overlay" id="loader"><div class="loading-spinner"></div><div class="loading-text" id="loadText">Cargando...</div></div>
+
+<!-- ========== LOGIN ========== -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-brand">HotelSync</div>
+    <div class="login-tagline">Property Management System</div>
+    <div class="login-avatar">🏨</div>
+    <div class="auth-msg pending" id="authMsg">Inicia sesión con tu cuenta de Google</div>
+    <button class="btn-google" onclick="App.startAuth()">
+      <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Iniciar sesión con Google
+    </button>
+    <div class="login-note">Tu sesión es segura y los datos se sincronizan directo con Google Sheets.</div>
+  </div>
+</div>
+
+<!-- ========== APP ========== -->
+<div id="app-screen">
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">HotelSync</div>
+      <div class="sidebar-hotel-name">Property Management System</div>
+    </div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-avatar" id="userAvatar">U</div>
+      <div class="sidebar-user-meta">
+        <div class="sidebar-user-name" id="userName">Usuario</div>
+        <span class="sidebar-user-role" id="userRole">Sin rol</span>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Principal</div>
+      <div class="nav-item active" data-page="dashboard" onclick="App.nav('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        <span>Dashboard</span>
+      </div>
+      <div class="nav-item" data-page="rooms" onclick="App.nav('rooms')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7v11a2 2 0 002 2h14a2 2 0 002-2V7"/><path d="M21 7l-9-4-9 4"/><path d="M9 22V12h6v10"/></svg>
+        <span>Habitaciones</span>
+      </div>
+      <div class="nav-section-label">Operaciones</div>
+      <div class="nav-item" data-page="reservations" onclick="App.nav('reservations')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span>Reservas</span>
+      </div>
+      <div class="nav-item" data-page="guests" onclick="App.nav('guests')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        <span>Huéspedes</span>
+      </div>
+      <div class="nav-item" data-page="history" onclick="App.nav('history')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Historial</span>
+      </div>
+      <div class="nav-section-label">Administración</div>
+      <div class="nav-item" data-page="users" onclick="App.nav('users')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Usuarios & Roles</span>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sync-indicator"><div class="sync-dot" id="syncDot"></div><span id="syncTxt">Conectado</span></div>
+      <button class="btn btn-ghost" style="padding:6px 10px;font-size:0.73rem" onclick="App.logout()">Salir</button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+
+    <!-- DASHBOARD -->
+    <div class="page-section active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-title-group"><div class="page-title">Panel <span class="hl">General</span></div><div class="page-subtitle">Vista global de operaciones del hotel</div></div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="App.refreshToken()">🔑 Token</button>
+          <button class="btn btn-primary" onclick="App.sync()">⟳ Sincronizar</button>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card gold"><div class="stat-label">Total Habitaciones</div><div class="stat-value gold" id="sTotal">0</div></div>
+        <div class="stat-card green"><div class="stat-label">Disponibles</div><div class="stat-value green" id="sDisp">0</div></div>
+        <div class="stat-card red"><div class="stat-label">Ocupadas</div><div class="stat-value red" id="sOcup">0</div></div>
+        <div class="stat-card orange"><div class="stat-label">Reservas Activas</div><div class="stat-value orange" id="sReserv">0</div></div>
+        <div class="stat-card blue"><div class="stat-label">Tasa Ocupación</div><div class="stat-value blue" id="sOccRate">0%</div></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.13rem;font-weight:700">Mapa de Habitaciones</h3>
+      </div>
+      <div class="room-grid" id="dashRooms"></div>
+    </div>
+
+    <!-- ROOMS -->
+    <div class="page-section" id="page-rooms">
+      <div class="page-header">
+        <div class="page-title-group"><div class="page-title">Gestión de <span class="hl">Habitaciones</span></div><div class="page-subtitle">Administra estados, precios y asignaciones</div></div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="App.sync()">⟳ Recargar</button>
+          <button class="btn btn-primary" onclick="App.openModal('modalAddRoom')">+ Agregar Habitación</button>
+        </div>
+      </div>
+      <div class="filter-bar" id="roomFilters">
+        <button class="filter-chip active" onclick="App.setFilter('todas',this)">Todas</button>
+        <button class="filter-chip" onclick="App.setFilter('Disponible',this)">Disponibles</button>
+        <button class="filter-chip" onclick="App.setFilter('Ocupada',this)">Ocupadas</button>
+        <button class="filter-chip" onclick="App.setFilter('Limpieza',this)">Limpieza</button>
+        <button class="filter-chip" onclick="App.setFilter('Mantenimiento',this)">Mantenimiento</button>
+        <button class="filter-chip" onclick="App.setFilter('Reservada',this)">Reservadas</button>
+      </div>
+      <div class="room-grid" id="roomGrid"></div>
+    </div>
+
+    <!-- RESERVATIONS -->
+    <div class="page-section" id="page-reservations">
+      <div class="page-header">
+        <div class="page-title-group"><div class="page-title">Gestión de <span class="hl">Reservas</span></div><div class="page-subtitle">Check-in, check-out y seguimiento</div></div>
+        <button class="btn btn-primary" onclick="App.openModal('modalAddRes')">+ Nueva Reserva</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>ID</th><th>Hab.</th><th>Huésped</th><th>Check-In</th><th>Check-Out</th><th>Estado</th><th>Total</th><th>Creado por</th><th>Acciones</th></tr></thead><tbody id="resBody"></tbody></table></div>
+    </div>
+
+    <!-- GUESTS -->
+    <div class="page-section" id="page-guests">
+      <div class="page-header">
+        <div class="page-title-group"><div class="page-title">Gestión de <span class="hl">Huéspedes</span></div><div class="page-subtitle">CRM y perfiles de clientes</div></div>
+        <button class="btn btn-primary" onclick="App.openModal('modalAddGuest')">+ Nuevo Huésped</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>ID</th><th>Nombre</th><th>Documento</th><th>Teléfono</th><th>Email</th><th>País</th><th>Estancias</th><th>Última Visita</th></tr></thead><tbody id="guestBody"></tbody></table></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="page-section" id="page-history">
+      <div class="page-header">
+        <div class="page-title-group"><div class="page-title"><span class="hl">Historial</span> de Estancias</div><div class="page-subtitle">Registro completo de check-outs y estancias pasadas</div></div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Hab.</th><th>Huésped</th><th>Check-In</th><th>Check-Out</th><th>Total</th><th>Nota</th></tr></thead><tbody id="histBody"></tbody></table></div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page-section" id="page-users">
+      <div class="page-header">
+        <div class="page-title-group"><div class="page-title">Usuarios & <span class="hl">Roles</span></div><div class="page-subtitle">Control de acceso basado en roles (RBAC)</div></div>
+        <button class="btn btn-primary" onclick="App.openModal('modalAddUser')">+ Agregar Usuario</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Email</th><th>Nombre</th><th>Rol</th><th>Estado</th></tr></thead><tbody id="usersBody"></tbody></table></div>
+      <div class="config-block" style="margin-top:20px">
+        <h3>📋 Roles Disponibles</h3>
+        <div class="detail-grid">
+          <div class="detail-box"><div class="detail-box-title gold">👑 Administrador</div><div style="font-size:0.8rem;color:var(--text-70)">Acceso total: Dashboard, Habitaciones, Reservas, Huéspedes, Historial, Usuarios, Config, Reportes</div></div>
+          <div class="detail-box"><div class="detail-box-title blue">🛎️ Recepcionista</div><div style="font-size:0.8rem;color:var(--text-70)">Dashboard, Habitaciones, Reservas, Huéspedes, Historial</div></div>
+          <div class="detail-box"><div class="detail-box-title green">🧹 Housekeeping</div><div style="font-size:0.8rem;color:var(--text-70)">Dashboard, Habitaciones (cambiar estado limpieza)</div></div>
+          <div class="detail-box"><div class="detail-box-title" style="color:var(--purple)">👁️ Solo Lectura</div><div style="font-size:0.8rem;color:var(--text-70)">Solo puede ver el Dashboard</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== MODALS ========== -->
+
+<!-- Room Detail -->
+<div class="modal-overlay" id="modalRoom"><div class="modal"><div class="modal-title" id="modalRoomTitle">Habitación</div><div id="modalRoomContent"></div><div class="modal-actions" id="modalRoomActions"></div></div></div>
+
+<!-- Add Room -->
+<div class="modal-overlay" id="modalAddRoom"><div class="modal">
+  <div class="modal-title"><div class="icon" style="background:var(--accent-glow)">🏠</div> Agregar Habitación</div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Número <span class="req">*</span></label><input class="form-input" id="fRoomNum" placeholder="101"></div>
+    <div class="form-group"><label class="form-label">Piso</label><input class="form-input" id="fRoomFloor" placeholder="1"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Tipo</label><select class="form-select" id="fRoomType"></select></div>
+    <div class="form-group"><label class="form-label">Precio/noche</label><input class="form-input" id="fRoomPrice" type="number" placeholder="0.00"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Estado</label><select class="form-select" id="fRoomState"></select></div>
+  <div class="form-group"><label class="form-label">Notas</label><input class="form-input" id="fRoomNotes" placeholder="Opcional"></div>
+  <div class="modal-actions"><button class="btn btn-secondary" onclick="App.closeModal('modalAddRoom')">Cancelar</button><button class="btn btn-primary" onclick="App.addRoom()">Guardar</button></div>
+</div></div>
+
+<!-- Add Reservation -->
+<div class="modal-overlay" id="modalAddRes"><div class="modal">
+  <div class="modal-title"><div class="icon" style="background:var(--blue-bg)">📅</div> Nueva Reserva</div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Habitación <span class="req">*</span></label><select class="form-select" id="fResRoom"></select></div>
+    <div class="form-group"><label class="form-label">Huésped <span class="req">*</span></label><select class="form-select" id="fResGuest"></select></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Check-In <span class="req">*</span></label><input class="form-input" id="fResCI" type="date"></div>
+    <div class="form-group"><label class="form-label">Check-Out <span class="req">*</span></label><input class="form-input" id="fResCO" type="date"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Estado</label><select class="form-select" id="fResState"></select></div>
+    <div class="form-group"><label class="form-label">Total (Bs)</label><input class="form-input" id="fResTotal" type="number" placeholder="0.00"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Notas</label><input class="form-input" id="fResNotes" placeholder="Opcional"></div>
+  <div class="modal-actions"><button class="btn btn-secondary" onclick="App.closeModal('modalAddRes')">Cancelar</button><button class="btn btn-primary" onclick="App.addReservation()">Crear Reserva</button></div>
+</div></div>
+
+<!-- Add Guest -->
+<div class="modal-overlay" id="modalAddGuest"><div class="modal">
+  <div class="modal-title"><div class="icon" style="background:var(--green-bg)">👤</div> Nuevo Huésped</div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Nombre <span class="req">*</span></label><input class="form-input" id="fGuestName" placeholder="Juan Pérez"></div>
+    <div class="form-group"><label class="form-label">Documento <span class="req">*</span></label><input class="form-input" id="fGuestDoc" placeholder="12345678"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Teléfono</label><input class="form-input" id="fGuestPhone" placeholder="+591 7XXXXXXX"></div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="fGuestEmail" type="email" placeholder="juan@email.com"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">País</label><input class="form-input" id="fGuestCountry" placeholder="Bolivia"></div>
+    <div class="form-group"><label class="form-label">Dirección</label><input class="form-input" id="fGuestAddr" placeholder="Opcional"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Notas</label><input class="form-input" id="fGuestNotes" placeholder="Opcional"></div>
+  <div class="modal-actions"><button class="btn btn-secondary" onclick="App.closeModal('modalAddGuest')">Cancelar</button><button class="btn btn-primary" onclick="App.addGuest()">Registrar</button></div>
+</div></div>
+
+<!-- Add User -->
+<div class="modal-overlay" id="modalAddUser"><div class="modal">
+  <div class="modal-title"><div class="icon" style="background:var(--purple-bg)">🔐</div> Agregar Usuario</div>
+  <div class="form-group"><label class="form-label">Email de Google <span class="req">*</span></label><input class="form-input" id="fUserEmail" placeholder="usuario@gmail.com"></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="fUserName" placeholder="Nombre completo"></div>
+    <div class="form-group"><label class="form-label">Rol</label><select class="form-select" id="fUserRole"><option value="admin">👑 Administrador</option><option value="recepcion">🛎️ Recepcionista</option><option value="housekeeping">🧹 Housekeeping</option><option value="viewer">👁️ Solo Lectura</option></select></div>
+  </div>
+  <div class="modal-actions"><button class="btn btn-secondary" onclick="App.closeModal('modalAddUser')">Cancelar</button><button class="btn btn-primary" onclick="App.addUser()">Agregar</button></div>
+</div></div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+// Populate select options from config
+document.addEventListener('DOMContentLoaded', () => {
+  const fill = (id, arr) => { const el = document.getElementById(id); if(el) el.innerHTML = arr.map(v => `<option>${v}</option>`).join(''); };
+  fill('fRoomType', CONFIG.ROOM_TYPES);
+  fill('fRoomState', CONFIG.ROOM_STATES);
+  fill('fResState', CONFIG.RESERVATION_STATES);
+});
+</script>
+</body>
+</html>
