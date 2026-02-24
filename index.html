@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HotelSync — Sistema de Gestión Hotelera</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F1117;--bg2:#181B25;--card:#1E2230;--card2:#252A3A;--gold:#C9A96E;--gold-l:#E8D5A8;--gold-d:#9E7D3E;--t1:#F0EDE6;--t2:#8E8D8A;--t3:#5A5956;--ok:#4CAF50;--warn:#FF9800;--err:#E74C3C;--info:#42A5F5;--brd:rgba(201,169,110,.12);--sh:0 4px 24px rgba(0,0,0,.3);--r:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(201,169,110,.03)0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(201,169,110,.02)0%,transparent 50%);pointer-events:none;z-index:0}
+
+#setup{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:relative;z-index:1}
+.sbox{background:var(--card);border:1px solid var(--brd);border-radius:20px;padding:44px;max-width:620px;width:100%;box-shadow:var(--sh);animation:fu .6s ease}
+@keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.slogo{font-family:'DM Serif Display',serif;font-size:32px;color:var(--gold);margin-bottom:8px}
+.ssub{color:var(--t2);font-size:14px;margin-bottom:32px;line-height:1.6}
+.fg{margin-bottom:22px}
+.fg label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--t2);margin-bottom:7px}
+.fg label .rq{color:var(--err)}
+.fg input,.fg textarea,.fg select{width:100%;padding:13px 15px;background:var(--bg);border:1px solid var(--brd);border-radius:10px;color:var(--t1);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;transition:border-color .3s}
+.fg input:focus,.fg textarea:focus,.fg select:focus{outline:none;border-color:var(--gold)}
+.fg textarea{resize:vertical;min-height:60px;font-size:12px}
+.fg small{display:block;margin-top:5px;font-size:11px;color:var(--t3);line-height:1.5}
+.fg small code{background:rgba(201,169,110,.1);padding:1px 5px;border-radius:4px;font-size:10px;color:var(--gold-l)}
+
+.steps{margin-bottom:24px}
+.steps-t{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:12px}
+.st{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--bg);border-radius:10px;margin-bottom:8px;border:1px solid var(--brd)}
+.st-n{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-d));color:var(--bg);font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.st-t{font-size:12px;color:var(--t2);line-height:1.6}
+.st-t strong{color:var(--t1)}
+.dvd{height:1px;background:var(--brd);margin:24px 0}
+
+.cbox{background:var(--bg);border:1px solid var(--brd);border-radius:12px;padding:20px;margin-bottom:20px}
+.cbox-t{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+.asts{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;margin-bottom:16px}
+.asts.p{background:rgba(255,152,0,.1);border:1px solid rgba(255,152,0,.2);color:var(--warn)}
+.asts.g{background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.2);color:var(--ok)}
+.asts.e{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.2);color:var(--err)}
+
+.bp{width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),var(--gold-d));border:none;border-radius:10px;color:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s}
+.bp:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,169,110,.3)}
+.bp:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.bg{width:100%;padding:14px;background:#fff;border:1px solid #dadce0;border-radius:10px;color:#3c4043;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px}
+.bg:hover{background:#f8f9fa;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+
+#app{display:none;position:relative;z-index:1}
+.sb{position:fixed;left:0;top:0;bottom:0;width:260px;background:var(--bg2);border-right:1px solid var(--brd);padding:28px 0;z-index:100;display:flex;flex-direction:column}
+.sb-l{font-family:'DM Serif Display',serif;font-size:22px;color:var(--gold);padding:0 28px;margin-bottom:6px}
+.sb-h{font-size:11px;color:var(--t3);padding:0 28px;margin-bottom:8px}
+.sb-u{font-size:10px;color:var(--gold-d);padding:0 28px;margin-bottom:28px;display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-u::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ok);flex-shrink:0}
+.sb-n{flex:1}
+.ni{display:flex;align-items:center;gap:12px;padding:13px 28px;color:var(--t2);cursor:pointer;transition:all .2s;font-size:14px;font-weight:500;border-left:3px solid transparent}
+.ni:hover{color:var(--t1);background:rgba(201,169,110,.05)}
+.ni.a{color:var(--gold);background:rgba(201,169,110,.08);border-left-color:var(--gold)}
+.ni svg{width:18px;height:18px;flex-shrink:0}
+.sb-f{padding:20px 28px;border-top:1px solid var(--brd)}
+.ss{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)}
+.sd{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:pu 2s infinite}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.4}}
+
+.mc{margin-left:260px;padding:32px 40px;min-height:100vh}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px}
+.pt{font-family:'DM Serif Display',serif;font-size:28px}
+.pt span{color:var(--gold)}
+
+.sr{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.sc{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:22px;transition:transform .2s}
+.sc:hover{transform:translateY(-2px)}
+.sl{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:10px}
+.sv{font-size:30px;font-weight:700}
+.sv.ga{color:var(--gold)}.sv.go{color:var(--ok)}.sv.gw{color:var(--warn)}.sv.ge{color:var(--err)}
+
+.rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:20px}
+.rc{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:22px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.rc:hover{background:var(--card2);transform:translateY(-2px);box-shadow:var(--sh)}
+.rc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.rc.disponible::before{background:var(--ok)}.rc.ocupada::before{background:var(--err)}.rc.limpieza::before{background:var(--warn)}.rc.mantenimiento::before{background:var(--info)}
+.rn{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:4px}
+.rt{font-size:12px;color:var(--t2);margin-bottom:14px}
+.rsb{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.bd{background:rgba(76,175,80,.15);color:var(--ok)}.bo{background:rgba(231,76,60,.15);color:var(--err)}.bl{background:rgba(255,152,0,.15);color:var(--warn)}.bm{background:rgba(66,165,245,.15);color:var(--info)}
+.rp{margin-top:14px;font-size:20px;font-weight:700;color:var(--gold)}
+.rp span{font-size:12px;font-weight:400;color:var(--t3)}
+.rgu{margin-top:10px;font-size:12px;color:var(--t2);display:flex;align-items:center;gap:6px}
+
+.ar{display:flex;gap:12px;flex-wrap:wrap}
+.btn{padding:10px 20px;border-radius:10px;border:1px solid var(--brd);background:var(--card);color:var(--t1);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{background:var(--card2);border-color:var(--gold)}
+.ba{background:linear-gradient(135deg,var(--gold),var(--gold-d));color:var(--bg);border:none}
+.ba:hover{box-shadow:0 4px 15px rgba(201,169,110,.3)}
+
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px}
+.mo.x{display:flex}
+.md{background:var(--card);border:1px solid var(--brd);border-radius:16px;padding:36px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;animation:fu .3s ease}
+.md h2{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:24px;color:var(--gold)}
+.ma{display:flex;gap:12px;margin-top:28px}
+.ma .btn{flex:1;justify-content:center}
+
+.tc{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;margin-top:20px}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--bg2);padding:14px 18px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--t3);font-weight:600}
+tbody td{padding:14px 18px;font-size:13px;color:var(--t2);border-bottom:1px solid var(--brd)}
+tbody tr:hover{background:rgba(201,169,110,.03)}
+tbody tr:last-child td{border-bottom:none}
+
+.lo{display:none;position:fixed;inset:0;background:rgba(15,17,23,.9);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.lo.x{display:flex}
+.sp{width:40px;height:40px;border:3px solid var(--brd);border-top-color:var(--gold);border-radius:50%;animation:sn 1s linear infinite}
+@keyframes sn{to{transform:rotate(360deg)}}
+.lt{color:var(--t2);font-size:14px}
+
+.toc{position:fixed;top:20px;right:20px;z-index:400;display:flex;flex-direction:column;gap:8px}
+.to{padding:14px 20px;border-radius:10px;font-size:13px;font-weight:500;animation:si .3s ease,fo .3s ease 2.7s forwards;max-width:380px}
+.tos{background:rgba(76,175,80,.15);color:var(--ok);border:1px solid rgba(76,175,80,.3)}
+.toe{background:rgba(231,76,60,.15);color:var(--err);border:1px solid rgba(231,76,60,.3)}
+.toi{background:rgba(66,165,245,.15);color:var(--info);border:1px solid rgba(66,165,245,.3)}
+@keyframes si{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fo{to{opacity:0;transform:translateY(-10px)}}
+
+.ps{display:none}.ps.x{display:block}
+.fb{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.fc{padding:8px 16px;border-radius:20px;border:1px solid var(--brd);background:transparent;color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Plus Jakarta Sans',sans-serif}
+.fc.a,.fc:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.08)}
+
+.cs{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:28px;margin-bottom:20px}
+.cs h3{font-size:16px;font-weight:600;margin-bottom:16px;color:var(--gold)}
+.ti{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--t2);margin-bottom:16px}
+.ti .dt{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ti .dt.ac{background:var(--ok)}.ti .dt.ex{background:var(--err)}
+
+@media(max-width:900px){
+.sb{width:70px;padding:20px 0}.sb-l,.sb-h,.sb-u,.ni span,.sb-f{display:none}
+.ni{justify-content:center;padding:16px;border-left:none}
+.mc{margin-left:70px;padding:20px}
+.sr{grid-template-columns:repeat(2,1fr)}
+.sbox{padding:28px 20px}
+}
+</style>
+</head>
+<body>
+
+<div class="toc" id="toc"></div>
+<div class="lo" id="lo"><div class="sp"></div><div class="lt" id="lt">Sincronizando...</div></div>
+
+<!-- SETUP -->
+<div id="setup">
+<div class="sbox">
+<div class="slogo">HotelSync</div>
+<div class="ssub">Sistema de gestión hotelera con Google Sheets y autenticación OAuth 2.0.</div>
+
+<div class="steps">
+<div class="steps-t">📋 Configuración previa en Google Cloud:</div>
+<div class="st"><div class="st-n">1</div><div class="st-t">Habilita <strong>Google Sheets API</strong> en APIs & Services → Library</div></div>
+<div class="st"><div class="st-n">2</div><div class="st-t">Crea <strong>OAuth 2.0 Client ID</strong> (Web app). En Authorized JS origins agrega la URL de esta app.</div></div>
+<div class="st"><div class="st-n">3</div><div class="st-t">Crea una <strong>API Key</strong> en Credentials. Copia el Client ID y la API Key.</div></div>
+<div class="st"><div class="st-n">4</div><div class="st-t">Crea un Spreadsheet con hojas: <strong>Habitaciones, Reservas, Huéspedes</strong> con encabezados en fila 1.</div></div>
+</div>
+
+<div class="dvd"></div>
+
+<div class="fg"><label>Nombre del Hotel</label><input type="text" id="hotelName" placeholder="Ej: Hotel Bella Vista"></div>
+
+<div class="cbox">
+<div class="cbox-t">🔒 Credenciales de Google Cloud</div>
+<div class="fg" style="margin-bottom:14px"><label>Client ID de OAuth 2.0 <span class="rq">*</span></label><input type="text" id="clientId" placeholder="123456789-abc.apps.googleusercontent.com"><small>Google Cloud → Credentials → OAuth 2.0 Client IDs</small></div>
+<div class="fg" style="margin-bottom:14px"><label>API Key <span class="rq">*</span></label><input type="text" id="apiKey" placeholder="AIzaSy..."><small>Google Cloud → Credentials → API Keys</small></div>
+<div class="fg" style="margin-bottom:0"><label>Spreadsheet ID <span class="rq">*</span></label><input type="text" id="spreadsheetId" placeholder="1BxiMVs0XRA5n..."><small>En la URL: <code>docs.google.com/spreadsheets/d/<strong>ID</strong>/edit</code></small></div>
+</div>
+
+<div class="fg"><label>Nombres de las Hojas</label><input type="text" id="sheetNames" value="Habitaciones,Reservas,Huéspedes"><small><strong>Habitaciones:</strong> Número|Tipo|Precio|Estado|Piso|Notas — <strong>Reservas:</strong> ID|Habitación|Huésped|CheckIn|CheckOut|Estado|Total|Notas — <strong>Huéspedes:</strong> ID|Nombre|Documento|Teléfono|Email|País</small></div>
+
+<div class="asts p" id="authSt">⏳ Pendiente — Inicia sesión con Google</div>
+
+<button class="bg" onclick="startAuth()">
+<svg viewBox="0 0 24 24" width="20" height="20"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+Iniciar sesión con Google
+</button>
+
+<button class="bp" id="btnConn" onclick="connect()" disabled>Conectar con Google Sheets</button>
+<div style="margin-top:14px;text-align:center"><small style="color:var(--t3);font-size:11px">Tokens almacenados solo en tu navegador.</small></div>
+</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+<nav class="sb">
+<div class="sb-l">HotelSync</div>
+<div class="sb-h" id="sbH">Hotel</div>
+<div class="sb-u" id="sbU"></div>
+<div class="sb-n">
+<div class="ni a" onclick="nav('dash')" data-p="dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Dashboard</span></div>
+<div class="ni" onclick="nav('rooms')" data-p="rooms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v11a2 2 0 002 2h14a2 2 0 002-2V7"/><path d="M21 7l-9-4-9 4"/></svg><span>Habitaciones</span></div>
+<div class="ni" onclick="nav('res')" data-p="res"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Reservas</span></div>
+<div class="ni" onclick="nav('guests')" data-p="guests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Huéspedes</span></div>
+<div class="ni" onclick="nav('cfg')" data-p="cfg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2"/></svg><span>Config</span></div>
+</div>
+<div class="sb-f"><div class="ss"><div class="sd" id="sDot"></div><span id="sTxt">Conectado</span></div></div>
+</nav>
+
+<div class="mc">
+
+<!-- Dashboard -->
+<div class="ps x" id="p-dash">
+<div class="ph"><div class="pt">Panel <span>General</span></div><div class="ar"><button class="btn" onclick="refTk()">🔑 Token</button><button class="btn ba" onclick="sync()">⟳ Sincronizar</button></div></div>
+<div class="sr">
+<div class="sc"><div class="sl">Total Habitaciones</div><div class="sv ga" id="xT">0</div></div>
+<div class="sc"><div class="sl">Disponibles</div><div class="sv go" id="xD">0</div></div>
+<div class="sc"><div class="sl">Ocupadas</div><div class="sv ge" id="xO">0</div></div>
+<div class="sc"><div class="sl">Reservas Activas</div><div class="sv gw" id="xR">0</div></div>
+</div>
+<h3 style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:16px">Vista Rápida</h3>
+<div class="rg" id="dRooms"></div>
+</div>
+
+<!-- Rooms -->
+<div class="ps" id="p-rooms">
+<div class="ph"><div class="pt">Gestión de <span>Habitaciones</span></div><div class="ar"><button class="btn" onclick="sync()">⟳ Recargar</button><button class="btn ba" onclick="oM('aR')">+ Agregar</button></div></div>
+<div class="fb" id="rFlt">
+<button class="fc a" onclick="flt('todas',this)">Todas</button>
+<button class="fc" onclick="flt('Disponible',this)">Disponibles</button>
+<button class="fc" onclick="flt('Ocupada',this)">Ocupadas</button>
+<button class="fc" onclick="flt('Limpieza',this)">Limpieza</button>
+<button class="fc" onclick="flt('Mantenimiento',this)">Mantenimiento</button>
+</div>
+<div class="rg" id="rGrid"></div>
+</div>
+
+<!-- Reservations -->
+<div class="ps" id="p-res">
+<div class="ph"><div class="pt">Gestión de <span>Reservas</span></div><button class="btn ba" onclick="oM('aRes')">+ Nueva Reserva</button></div>
+<div class="tc"><table><thead><tr><th>ID</th><th>Habitación</th><th>Huésped</th><th>Check-In</th><th>Check-Out</th><th>Estado</th><th>Total</th><th>Acciones</th></tr></thead><tbody id="rTbl"></tbody></table></div>
+</div>
+
+<!-- Guests -->
+<div class="ps" id="p-guests">
+<div class="ph"><div class="pt">Gestión de <span>Huéspedes</span></div><button class="btn ba" onclick="oM('aG')">+ Nuevo Huésped</button></div>
+<div class="tc"><table><thead><tr><th>ID</th><th>Nombre</th><th>Documento</th><th>Teléfono</th><th>Email</th><th>País</th></tr></thead><tbody id="gTbl"></tbody></table></div>
+</div>
+
+<!-- Config -->
+<div class="ps" id="p-cfg">
+<div class="ph"><div class="pt">Configuración</div></div>
+<div class="cs"><h3>Autenticación</h3><div class="ti" id="tkI"><div class="dt ac"></div><span>Token activo</span></div><div class="ar"><button class="btn" onclick="refTk()">Renovar Token</button><button class="btn" onclick="revoke()" style="border-color:rgba(231,76,60,.3);color:var(--err)">Cerrar Sesión</button></div></div>
+<div class="cs"><h3>Google Sheets</h3>
+<div class="fg"><label>Client ID</label><input type="text" id="cCid"></div>
+<div class="fg"><label>API Key</label><input type="text" id="cKey"></div>
+<div class="fg"><label>Spreadsheet ID</label><input type="text" id="cSid"></div>
+<div class="fg"><label>Hojas</label><input type="text" id="cShn"></div>
+<button class="btn ba" onclick="saveCfg()">Guardar</button>
+</div>
+<div class="cs"><h3>Acciones</h3><div class="ar"><button class="btn" onclick="sync()">Forzar Sync</button><button class="btn" onclick="clearAll()" style="border-color:rgba(231,76,60,.3);color:var(--err)">Desconectar</button></div></div>
+</div>
+</div>
+</div>
+
+<!-- MODALS -->
+<div class="mo" id="m-aR"><div class="md"><h2>Agregar Habitación</h2>
+<div class="fg"><label>Número <span class="rq">*</span></label><input type="text" id="fRN" placeholder="101"></div>
+<div class="fg"><label>Tipo</label><select id="fRT"><option>Individual</option><option>Doble</option><option>Suite</option><option>Familiar</option><option>Presidencial</option></select></div>
+<div class="fg"><label>Precio/noche (USD)</label><input type="number" id="fRP" placeholder="0.00"></div>
+<div class="fg"><label>Estado</label><select id="fRS"><option>Disponible</option><option>Ocupada</option><option>Limpieza</option><option>Mantenimiento</option></select></div>
+<div class="fg"><label>Piso</label><input type="text" id="fRF" placeholder="1"></div>
+<div class="fg"><label>Notas</label><input type="text" id="fRNo" placeholder="Opcional"></div>
+<div class="ma"><button class="btn" onclick="cM('aR')">Cancelar</button><button class="btn ba" onclick="addRoom()">Guardar</button></div>
+</div></div>
+
+<div class="mo" id="m-aRes"><div class="md"><h2>Nueva Reserva</h2>
+<div class="fg"><label>Habitación <span class="rq">*</span></label><select id="fHab"></select></div>
+<div class="fg"><label>Huésped <span class="rq">*</span></label><select id="fHue"></select></div>
+<div class="fg"><label>Check-In <span class="rq">*</span></label><input type="date" id="fCI"></div>
+<div class="fg"><label>Check-Out <span class="rq">*</span></label><input type="date" id="fCO"></div>
+<div class="fg"><label>Estado</label><select id="fResS"><option>Confirmada</option><option>Pendiente</option><option>Cancelada</option><option>Completada</option></select></div>
+<div class="fg"><label>Total (USD)</label><input type="number" id="fResT" placeholder="0.00"></div>
+<div class="fg"><label>Notas</label><input type="text" id="fResN" placeholder="Opcional"></div>
+<div class="ma"><button class="btn" onclick="cM('aRes')">Cancelar</button><button class="btn ba" onclick="addRes()">Crear</button></div>
+</div></div>
+
+<div class="mo" id="m-aG"><div class="md"><h2>Nuevo Huésped</h2>
+<div class="fg"><label>Nombre <span class="rq">*</span></label><input type="text" id="fGN" placeholder="Juan Pérez"></div>
+<div class="fg"><label>Documento <span class="rq">*</span></label><input type="text" id="fGD" placeholder="12345678"></div>
+<div class="fg"><label>Teléfono</label><input type="text" id="fGP" placeholder="+591 7XXXXXXX"></div>
+<div class="fg"><label>Email</label><input type="email" id="fGE" placeholder="juan@email.com"></div>
+<div class="fg"><label>País</label><input type="text" id="fGC" placeholder="Bolivia"></div>
+<div class="ma"><button class="btn" onclick="cM('aG')">Cancelar</button><button class="btn ba" onclick="addGuest()">Registrar</button></div>
+</div></div>
+
+<div class="mo" id="m-rD"><div class="md"><h2 id="rdT">Habitación</h2><div id="rdC"></div><div class="ma" id="rdA"></div></div></div>
+
+<!-- GIS -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<script>
+let C={apiKey:'',clientId:'',spreadsheetId:'',hotelName:'',sh:{rooms:'Habitaciones',res:'Reservas',guests:'Huéspedes'}};
+let A={token:null,exp:null,email:null,tc:null};
+let D={rooms:[],res:[],guests:[]};
+let curF='todas';
+const SC='https://www.googleapis.com/auth/spreadsheets';
+const SB='https://sheets.googleapis.com/v4/spreadsheets';
+
+// OAuth
+function initTC(){
+  if(!C.clientId)return;
+  A.tc=google.accounts.oauth2.initTokenClient({
+    client_id:C.clientId,scope:SC,
+    callback:r=>{
+      if(r.error){setAS('e','Error: '+r.error);toast('Error OAuth','error');return}
+      A.token=r.access_token;A.exp=Date.now()+(r.expires_in*1000);
+      fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{'Authorization':'Bearer '+A.token}})
+      .then(x=>x.json()).then(u=>{A.email=u.email||'OK';setAS('g','✓ Autenticado como '+A.email);$('btnConn').disabled=false;saveAuth()})
+      .catch(()=>{A.email='OK';setAS('g','✓ Autenticado');$('btnConn').disabled=false;saveAuth()});
+    }
+  });
+}
+
+function startAuth(){
+  const cid=$('clientId').value.trim();
+  if(!cid){toast('Ingresa el Client ID','error');return}
+  C.clientId=cid;C.apiKey=$('apiKey').value.trim();
+  try{initTC();A.tc.requestAccessToken({prompt:'consent'})}catch(e){toast('Error OAuth: '+e.message,'error')}
+}
+
+function refTk(){
+  if(!A.tc)initTC();
+  if(A.tc){A.tc.requestAccessToken({prompt:''});toast('Renovando token...','info')}
+  else toast('Sin Client ID','error');
+}
+
+function revoke(){
+  if(A.token){google.accounts.oauth2.revoke(A.token,()=>{A.token=null;A.exp=null;A.email=null;localStorage.removeItem('hs_a');toast('Sesión cerrada','info');updTI()})}
+}
+
+function tv(){return A.token&&A.exp&&Date.now()<A.exp}
+function saveAuth(){localStorage.setItem('hs_a',JSON.stringify({t:A.token,e:A.exp,m:A.email}))}
+
+async function ensT(){
+  if(tv())return true;
+  return new Promise(ok=>{
+    if(!A.tc)initTC();
+    if(!A.tc){toast('Configura Client ID','error');ok(false);return}
+    A.tc.callback=r=>{
+      if(r.error){ok(false);return}
+      A.token=r.access_token;A.exp=Date.now()+(r.expires_in*1000);saveAuth();ok(true);
+    };
+    A.tc.requestAccessToken({prompt:''});
+  });
+}
+
+function setAS(s,m){const e=$('authSt');e.className='asts '+s;e.textContent=m}
+function updTI(){
+  const e=$('tkI');if(!e)return;
+  if(tv()){const mn=Math.round((A.exp-Date.now())/60000);e.innerHTML='<div class="dt ac"></div><span>Token activo — ~'+mn+' min — '+(A.email||'')+'</span>'}
+  else e.innerHTML='<div class="dt ex"></div><span>Token expirado</span>';
+}
+
+function ah(){return{'Authorization':'Bearer '+A.token,'Content-Type':'application/json'}}
+
+// Sheets API
+async function sGet(sn,rn){
+  const r=rn?'!'+rn:'';const en=encodeURIComponent(sn);
+  let url,h;
+  if(tv()){url=SB+'/'+C.spreadsheetId+'/values/'+en+r;h=ah()}
+  else{url=SB+'/'+C.spreadsheetId+'/values/'+en+r+'?key='+C.apiKey;h={}}
+  const rs=await fetch(url,{headers:h});
+  if(!rs.ok){const er=await rs.json();throw new Error(er.error?.message||'Error lectura')}
+  return(await rs.json()).values||[];
+}
+
+async function sApp(sn,v){
+  if(!await ensT())throw new Error('Requiere autenticación OAuth');
+  const url=SB+'/'+C.spreadsheetId+'/values/'+encodeURIComponent(sn)+':append?valueInputOption=USER_ENTERED';
+  const rs=await fetch(url,{method:'POST',headers:ah(),body:JSON.stringify({values:[v]})});
+  if(!rs.ok){const er=await rs.json();throw new Error(er.error?.message||'Error escritura')}
+  return rs.json();
+}
+
+async function sUpd(sn,rn,v){
+  if(!await ensT())throw new Error('Requiere autenticación OAuth');
+  const url=SB+'/'+C.spreadsheetId+'/values/'+encodeURIComponent(sn)+'!'+rn+'?valueInputOption=USER_ENTERED';
+  const rs=await fetch(url,{method:'PUT',headers:ah(),body:JSON.stringify({values:[v]})});
+  if(!rs.ok){const er=await rs.json();throw new Error(er.error?.message||'Error update')}
+  return rs.json();
+}
+
+// Parse
+function pR(rows){if(rows.length<2)return[];return rows.slice(1).map((r,i)=>({_r:i+2,num:r[0]||'',tipo:r[1]||'',precio:parseFloat(r[2])||0,estado:r[3]||'Disponible',piso:r[4]||'',notas:r[5]||''}))}
+function pRes(rows){if(rows.length<2)return[];return rows.slice(1).map((r,i)=>({_r:i+2,id:r[0]||'',hab:r[1]||'',hue:r[2]||'',ci:r[3]||'',co:r[4]||'',est:r[5]||'',total:parseFloat(r[6])||0,notas:r[7]||''}))}
+function pG(rows){if(rows.length<2)return[];return rows.slice(1).map((r,i)=>({_r:i+2,id:r[0]||'',nom:r[1]||'',doc:r[2]||'',tel:r[3]||'',email:r[4]||'',pais:r[5]||''}))}
+
+// Sync
+async function sync(){
+  sLoad('Sincronizando con Google Sheets...');
+  try{
+    const[a,b,c]=await Promise.all([sGet(C.sh.rooms),sGet(C.sh.res),sGet(C.sh.guests)]);
+    D.rooms=pR(a);D.res=pRes(b);D.guests=pG(c);
+    render();updTI();toast('Sincronizado','success');
+    $('sDot').style.background='var(--ok)';$('sTxt').textContent='Sincronizado';
+  }catch(e){console.error(e);toast('Error: '+e.message,'error');$('sDot').style.background='var(--err)';$('sTxt').textContent='Error'}
+  finally{hLoad()}
+}
+
+// Render
+function render(){rStats();rDash();rRooms();rResT();rGT()}
+function rStats(){
+  $('xT').textContent=D.rooms.length;
+  $('xD').textContent=D.rooms.filter(r=>r.estado==='Disponible').length;
+  $('xO').textContent=D.rooms.filter(r=>r.estado==='Ocupada').length;
+  $('xR').textContent=D.res.filter(r=>r.est==='Confirmada'||r.est==='Pendiente').length;
+}
+
+function mkRC(r){
+  const s=r.estado.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  const g=D.res.find(x=>x.hab===r.num&&x.est==='Confirmada');
+  const bc=s==='disponible'?'bd':s==='ocupada'?'bo':s==='limpieza'?'bl':'bm';
+  return '<div class="rc '+s+'" onclick="rdOpen(\''+r.num+'\')"><div class="rn">'+r.num+'</div><div class="rt">'+r.tipo+' · Piso '+r.piso+'</div><span class="rsb '+bc+'">'+r.estado+'</span><div class="rp">$'+r.precio.toFixed(2)+' <span>/noche</span></div>'+(g?'<div class="rgu">👤 '+g.hue+'</div>':'')+'</div>';
+}
+
+function rDash(){$('dRooms').innerHTML=D.rooms.length?D.rooms.map(mkRC).join(''):'<p style="color:var(--t3);padding:40px;text-align:center">Sin habitaciones</p>'}
+function rRooms(){
+  const f=curF==='todas'?D.rooms:D.rooms.filter(r=>r.estado===curF);
+  $('rGrid').innerHTML=f.length?f.map(mkRC).join(''):'<p style="color:var(--t3);padding:40px;text-align:center">Sin resultados</p>';
+}
+
+function rResT(){
+  const t=$('rTbl');
+  if(!D.res.length){t.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--t3)">Sin reservas</td></tr>';return}
+  t.innerHTML=D.res.map(r=>{
+    const bc=r.est==='Confirmada'?'bd':r.est==='Pendiente'?'bl':r.est==='Cancelada'?'bo':'bm';
+    return '<tr><td style="font-weight:600">'+r.id+'</td><td>'+r.hab+'</td><td>'+r.hue+'</td><td>'+r.ci+'</td><td>'+r.co+'</td><td><span class="rsb '+bc+'">'+r.est+'</span></td><td style="font-weight:600;color:var(--gold)">$'+r.total.toFixed(2)+'</td><td><button class="btn" style="padding:6px 12px;font-size:11px" onclick="chgRes(\''+r.id+'\')">Cambiar</button></td></tr>';
+  }).join('');
+}
+
+function rGT(){
+  const t=$('gTbl');
+  if(!D.guests.length){t.innerHTML='<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--t3)">Sin huéspedes</td></tr>';return}
+  t.innerHTML=D.guests.map(g=>'<tr><td style="font-weight:600">'+g.id+'</td><td>'+g.nom+'</td><td>'+g.doc+'</td><td>'+g.tel+'</td><td>'+g.email+'</td><td>'+g.pais+'</td></tr>').join('');
+}
+
+// Filters
+function flt(s,el){curF=s;document.querySelectorAll('#rFlt .fc').forEach(c=>c.classList.remove('a'));if(el)el.classList.add('a');rRooms()}
+
+// Room detail
+function rdOpen(n){
+  const r=D.rooms.find(x=>x.num===n);if(!r)return;
+  $('rdT').textContent='Habitación '+r.num;
+  const rv=D.res.find(x=>x.hab===r.num&&(x.est==='Confirmada'||x.est==='Pendiente'));
+  $('rdC').innerHTML='<div style="display:grid;gap:14px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><span style="color:var(--t3);font-size:11px;text-transform:uppercase;letter-spacing:1px">Tipo</span><br><strong>'+r.tipo+'</strong></div><div><span style="color:var(--t3);font-size:11px;text-transform:uppercase;letter-spacing:1px">Piso</span><br><strong>'+r.piso+'</strong></div><div><span style="color:var(--t3);font-size:11px;text-transform:uppercase;letter-spacing:1px">Precio</span><br><strong style="color:var(--gold)">$'+r.precio.toFixed(2)+'/noche</strong></div><div><span style="color:var(--t3);font-size:11px;text-transform:uppercase;letter-spacing:1px">Estado</span><br><strong>'+r.estado+'</strong></div></div>'+(r.notas?'<div style="padding:12px;background:var(--bg);border-radius:8px;font-size:13px;color:var(--t2)">'+r.notas+'</div>':'')+(rv?'<div style="padding:14px;background:rgba(201,169,110,.08);border-radius:10px;border:1px solid var(--brd)"><div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:6px;font-weight:600">Reserva Activa</div><strong>'+rv.hue+'</strong><div style="font-size:12px;color:var(--t2);margin-top:4px">'+rv.ci+' → '+rv.co+'</div></div>':'')+'</div><div class="fg" style="margin-top:14px"><label>Cambiar Estado</label><select id="rdS">'+['Disponible','Ocupada','Limpieza','Mantenimiento'].map(s=>'<option'+(r.estado===s?' selected':'')+'>'+s+'</option>').join('')+'</select></div>';
+  $('rdA').innerHTML='<button class="btn" onclick="cM(\'rD\')">Cerrar</button><button class="btn ba" onclick="updRS(\''+r.num+'\')">Actualizar</button>';
+  oM('rD');
+}
+
+async function updRS(n){
+  const r=D.rooms.find(x=>x.num===n);if(!r)return;
+  const ns=$('rdS').value;sLoad('Actualizando...');
+  try{await sUpd(C.sh.rooms,'D'+r._r,[ns]);r.estado=ns;render();cM('rD');toast('Habitación '+n+' → '+ns,'success')}
+  catch(e){toast('Error: '+e.message,'error')}finally{hLoad()}
+}
+
+// Add ops
+async function addRoom(){
+  const v=[$('fRN').value,$('fRT').value,$('fRP').value,$('fRS').value,$('fRF').value,$('fRNo').value];
+  if(!v[0]){toast('Número obligatorio','error');return}
+  sLoad('Agregando...');
+  try{await sApp(C.sh.rooms,v);cM('aR');toast('Habitación '+v[0]+' agregada','success');await sync();['fRN','fRP','fRF','fRNo'].forEach(i=>$(i).value='')}
+  catch(e){toast('Error: '+e.message,'error')}finally{hLoad()}
+}
+
+async function addRes(){
+  const id='R'+Date.now().toString().slice(-6);
+  const gs=$('fHue');
+  const v=[id,$('fHab').value,gs.options[gs.selectedIndex]?.text||'',$('fCI').value,$('fCO').value,$('fResS').value,$('fResT').value,$('fResN').value];
+  if(!v[1]||!v[3]||!v[4]){toast('Habitación, check-in y check-out obligatorios','error');return}
+  sLoad('Creando reserva...');
+  try{
+    await sApp(C.sh.res,v);
+    if(v[5]==='Confirmada'){const rm=D.rooms.find(r=>r.num===v[1]);if(rm)await sUpd(C.sh.rooms,'D'+rm._r,['Ocupada'])}
+    cM('aRes');toast('Reserva '+id+' creada','success');await sync();
+  }catch(e){toast('Error: '+e.message,'error')}finally{hLoad()}
+}
+
+async function addGuest(){
+  const id='G'+Date.now().toString().slice(-6);
+  const v=[id,$('fGN').value,$('fGD').value,$('fGP').value,$('fGE').value,$('fGC').value];
+  if(!v[1]||!v[2]){toast('Nombre y documento obligatorios','error');return}
+  sLoad('Registrando...');
+  try{await sApp(C.sh.guests,v);cM('aG');toast(v[1]+' registrado','success');await sync();['fGN','fGD','fGP','fGE','fGC'].forEach(i=>$(i).value='')}
+  catch(e){toast('Error: '+e.message,'error')}finally{hLoad()}
+}
+
+async function chgRes(rid){
+  const r=D.res.find(x=>x.id===rid);if(!r)return;
+  const sts=['Pendiente','Confirmada','Completada','Cancelada'];
+  const ns=sts[(sts.indexOf(r.est)+1)%sts.length];
+  sLoad('Actualizando...');
+  try{
+    await sUpd(C.sh.res,'F'+r._r,[ns]);
+    const rm=D.rooms.find(x=>x.num===r.hab);
+    if(rm){if(ns==='Confirmada')await sUpd(C.sh.rooms,'D'+rm._r,['Ocupada']);else if(ns==='Completada'||ns==='Cancelada')await sUpd(C.sh.rooms,'D'+rm._r,['Limpieza'])}
+    toast('Reserva '+rid+' → '+ns,'success');await sync();
+  }catch(e){toast('Error: '+e.message,'error')}finally{hLoad()}
+}
+
+// Nav
+function nav(p){
+  document.querySelectorAll('.ps').forEach(x=>x.classList.remove('x'));
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('a'));
+  $('p-'+p).classList.add('x');
+  document.querySelector('.ni[data-p="'+p+'"]').classList.add('a');
+  if(p==='res')popDD();if(p==='cfg')updTI();
+}
+
+function popDD(){
+  $('fHab').innerHTML=D.rooms.filter(r=>r.estado==='Disponible').map(r=>'<option value="'+r.num+'">'+r.num+' - '+r.tipo+' ($'+r.precio+')</option>').join('')||'<option value="">Sin disponibles</option>';
+  $('fHue').innerHTML=D.guests.map(g=>'<option value="'+g.id+'">'+g.nom+' ('+g.doc+')</option>').join('')||'<option value="">Sin huéspedes</option>';
+}
+
+// Modals
+function oM(id){if(id==='aRes')popDD();$('m-'+id).classList.add('x')}
+function cM(id){$('m-'+id).classList.remove('x')}
+document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('x')}));
+
+// Utils
+function $(id){return document.getElementById(id)}
+function sLoad(t){$('lt').textContent=t;$('lo').classList.add('x')}
+function hLoad(){$('lo').classList.remove('x')}
+function toast(m,t='info'){const c=$('toc'),e=document.createElement('div');e.className='to to'+(t==='success'?'s':t==='error'?'e':'i');e.textContent=m;c.appendChild(e);setTimeout(()=>e.remove(),3000)}
+
+// Config
+function saveCfg(){
+  C.clientId=$('cCid').value;C.apiKey=$('cKey').value;C.spreadsheetId=$('cSid').value;
+  const n=$('cShn').value.split(',').map(s=>s.trim());
+  C.sh={rooms:n[0]||'Habitaciones',res:n[1]||'Reservas',guests:n[2]||'Huéspedes'};
+  localStorage.setItem('hs_c',JSON.stringify(C));initTC();toast('Guardado','success');sync();
+}
+
+function clearAll(){
+  if(confirm('¿Desconectar? Se borra la config local.')){
+    localStorage.removeItem('hs_c');localStorage.removeItem('hs_a');
+    if(A.token)google.accounts.oauth2.revoke(A.token);location.reload();
+  }
+}
+
+// Connect
+async function connect(){
+  const b=$('btnConn');b.disabled=true;b.textContent='Conectando...';
+  C.hotelName=$('hotelName').value||'Mi Hotel';
+  C.clientId=$('clientId').value.trim();C.apiKey=$('apiKey').value.trim();C.spreadsheetId=$('spreadsheetId').value.trim();
+  const n=$('sheetNames').value.split(',').map(s=>s.trim());
+  C.sh={rooms:n[0]||'Habitaciones',res:n[1]||'Reservas',guests:n[2]||'Huéspedes'};
+  if(!C.clientId||!C.spreadsheetId){toast('Client ID y Spreadsheet ID obligatorios','error');b.disabled=false;b.textContent='Conectar con Google Sheets';return}
+  if(!A.token){toast('Inicia sesión con Google primero','error');b.disabled=false;b.textContent='Conectar con Google Sheets';return}
+  try{
+    await sGet(C.sh.rooms,'A1:A1');
+    localStorage.setItem('hs_c',JSON.stringify(C));
+    $('setup').style.display='none';$('app').style.display='block';
+    $('sbH').textContent=C.hotelName;$('sbU').textContent=A.email||'';
+    $('cCid').value=C.clientId;$('cKey').value=C.apiKey;$('cSid').value=C.spreadsheetId;
+    $('cShn').value=C.sh.rooms+','+C.sh.res+','+C.sh.guests;
+    await sync();toast('Bienvenido a '+C.hotelName,'success');
+  }catch(e){toast('Error: '+e.message,'error');b.disabled=false;b.textContent='Conectar con Google Sheets'}
+}
+
+// Init
+(function(){
+  const sa=localStorage.getItem('hs_a');
+  if(sa){try{const p=JSON.parse(sa);A.token=p.t;A.exp=p.e;A.email=p.m}catch(e){}}
+  const sc=localStorage.getItem('hs_c');
+  if(sc){try{
+    C=JSON.parse(sc);
+    if(C.spreadsheetId&&C.clientId){
+      $('setup').style.display='none';$('app').style.display='block';
+      $('sbH').textContent=C.hotelName||'Hotel';$('sbU').textContent=A.email||'';
+      $('cCid').value=C.clientId;$('cKey').value=C.apiKey;$('cSid').value=C.spreadsheetId;
+      $('cShn').value=(C.sh.rooms||'Habitaciones')+','+(C.sh.res||'Reservas')+','+(C.sh.guests||'Huéspedes');
+      const w=setInterval(()=>{if(window.google&&google.accounts){clearInterval(w);initTC();if(tv())sync();else refTk()}},200);
+    }
+  }catch(e){localStorage.removeItem('hs_c')}}
+  setInterval(()=>{if(A.tc&&A.exp&&(A.exp-Date.now())<5*60000)refTk()},60000);
+})();
+</script>
+</body>
+</html>
